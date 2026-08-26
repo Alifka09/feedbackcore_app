@@ -1,1 +1,34 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <h2>Опросник</h2>
+
+  <label>Как вам лук?</label>
+  <select id="quality">
+    <option>Отличный</option>
+    <option>Хороший</option>
+    <option>Средний</option>
+  </select>
+
+  <label>Понравился подарок?</label>
+  <select id="gift">
+    <option>Да</option>
+    <option>Нет</option>
+  </select>
+
+  <button onclick="send()">Отправить</button>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+
+    function send() {
+      const data = {
+        quality: document.getElementById('quality').value,
+        gift: document.getElementById('gift').value
+      };
+      tg.sendData(JSON.stringify(data));
+    }
+  </script>
+</body>
+</html>
 
