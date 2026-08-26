@@ -45,7 +45,7 @@ function send() {
     initData: tg.initData
   };
 
-  fetch("https://1198482.vds.as210546.net/api/feedback", {
+  fetch("https://77.239.106.188/api/feedback", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
