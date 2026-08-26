@@ -1,48 +1,12 @@
 <!DOCTYPE html>
 <html>
 <body>
-  <h2>Опросник</h2>
+  <h2 id="title">Опросник</h2>
 
-  <label>Как вам лук?</label>
-  <select id="quality">
-    <option>Отличный</option>
-    <option>Хороший</option>
-    <option>Средний</option>
-  </select>
-
-  <label>Понравился подарок?</label>
-  <select id="gift">
-    <option>Да</option>
-    <option>Нет</option>
-  </select>
+  <div id="form"></div>
 
   <button onclick="send()">Отправить</button>
 
-  <script>
-    const tg = window.Telegram.WebApp;
-
-    function send() {
-  const data = {
-    quality: document.getElementById('quality').value,
-    gift: document.getElementById('gift').value
-  };
-
-  fetch("https://1198482.vds.as210546.net/api/feedback", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(data)
-  })
-  .then(r => r.json())
-  .then(res => {
-    console.log("Saved:", res);
-    tg.close(); // закрыть WebApp
-  })
-  .catch(err => console.error(err));
-}
-
-  </script>
+  <script src="app.js"></script>
 </body>
 </html>
-
