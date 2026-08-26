@@ -90,4 +90,109 @@ try {
 // Добавляем случайный параметр к URL, чтобы Telegram всегда грузил свежую версию
 (function() {
   if (tg) {
-    const url = new
+    const url = new URL(window.location.href);
+    url.searchParams.set("v", Date.now()); // уникальная версия
+    if (!window.location.search.includes("v=")) {
+      window.location.replace(url.toString());
+    }
+  }
+})();
+
+// ===============================
+// 3) Конфиг формы
+// ===============================
+const config = {
+  title: "Опросник по луку",
+  version: "2026-08-27",
+  fields: [
+    {
+      id: "quality",
+      label: "Как вам лук?",
+      type: "select",
+      options: ["Отличный", "Хороший", "Средний", "Плохой"]
+    },
+    {
+      id: "gift",
+      label: "Понравился подарок?",
+      type: "select",
+      options: ["Да", "Нет"]
+    },
+    {
+      id: "package",
+      label: "Как вам упаковка?",
+      type: "select",
+      options: ["Отличная", "Хорошая", "Средняя", "Плохая"]
+    },
+    {
+      id: "delivery",
+      label: "Как прошла доставка?",
+      type: "select",
+      options: ["Быстро", "Нормально", "Долго", "Очень долго"]
+    }
+  ]
+};
+
+// ===============================
+// 4) Генерация формы
+// ===============================
+function loadForm() {
+  document.getElementById("title").textContent = config.title;
+
+  const form = document.getElementById("form");
+
+  config.fields.forEach(f => {
+    const wrapper = document.createElement("div");
+    wrapper.className = "field";
+
+    const label = document.createElement("label");
+    label.textContent = f.label;
+    wrapper.appendChild(label);
+
+    const select = document.createElement("select");
+    select.id = f.id;
+
+    f.options.forEach(opt => {
+      const o = document.createElement("option");
+      o.textContent = opt;
+      select.appendChild(o);
+    });
+
+    wrapper.appendChild(select);
+    form.appendChild(wrapper);
+  });
+}
+
+loadForm();
+
+// ===============================
+// 5) Отправка
+// ===============================
+function send() {
+  const data = {};
+  config.fields.forEach(f => {
+    data[f.id] = document.getElementById(f.id).value;
+  });
+
+  const payload = {
+    version: config.version,
+    answers: data,
+    initData: tg ? tg.initData : "local-test"
+  };
+
+  fetch("https://77.239.106.188/api/feedback", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  })
+  .then(r => r.json())
+  .then(res => {
+    console.log("Saved:", res);
+    if (tg) tg.close();
+    else alert("Локальный режим — данные отправлены");
+  })
+  .catch(err => console.error(err));
+}
+</script>
+
+</body>
+</html>
