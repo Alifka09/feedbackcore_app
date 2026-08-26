@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Опросник</title>
+<title>Опросник v12</title>
 
 <style>
   body {
@@ -31,7 +31,7 @@
     font-weight: 600;
   }
 
-  select, input, textarea {
+  select {
     width: 100%;
     padding: 12px;
     border-radius: 10px;
@@ -73,96 +73,21 @@
 </div>
 
 <script>
-const tg = window.Telegram.WebApp;
+// ===============================
+// 1) Защита от отсутствия Telegram API
+// ===============================
+let tg = null;
 
-// Конфиг прямо внутри файла — без questions.json
-const config = {
-  title: "Опросник по луку",
-  version: "2026-08-27",
-  fields: [
-    {
-      id: "quality",
-      label: "Как вам лук?",
-      type: "select",
-      options: ["Отличный", "Хороший", "Средний", "Плохой"]
-    },
-    {
-      id: "gift",
-      label: "Понравился подарок?",
-      type: "select",
-      options: ["Да", "Нет"]
-    },
-    {
-      id: "package",
-      label: "Как вам упаковка?",
-      type: "select",
-      options: ["Отличная", "Хорошая", "Средняя", "Плохая"]
-    },
-    {
-      id: "delivery",
-      label: "Как прошла доставка?",
-      type: "select",
-      options: ["Быстро", "Нормально", "Долго", "Очень долго"]
-    }
-  ]
-};
-
-// Генерация формы
-function loadForm() {
-  document.getElementById("title").textContent = config.title;
-
-  const form = document.getElementById("form");
-
-  config.fields.forEach(f => {
-    const wrapper = document.createElement("div");
-    wrapper.className = "field";
-
-    const label = document.createElement("label");
-    label.textContent = f.label;
-    wrapper.appendChild(label);
-
-    const select = document.createElement("select");
-    select.id = f.id;
-
-    f.options.forEach(opt => {
-      const o = document.createElement("option");
-      o.textContent = opt;
-      select.appendChild(o);
-    });
-
-    wrapper.appendChild(select);
-    form.appendChild(wrapper);
-  });
+try {
+  tg = window.Telegram.WebApp;
+} catch (e) {
+  tg = null;
 }
 
-loadForm();
-
-// Отправка
-function send() {
-  const data = {};
-  config.fields.forEach(f => {
-    data[f.id] = document.getElementById(f.id).value;
-  });
-
-  const payload = {
-    version: config.version,
-    answers: data,
-    initData: tg.initData
-  };
-
-  fetch("https://77.239.106.188/api/feedback", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  })
-  .then(r => r.json())
-  .then(res => {
-    console.log("Saved:", res);
-    tg.close();
-  })
-  .catch(err => console.error(err));
-}
-</script>
-
-</body>
-</html>
+// ===============================
+// 2) Анти-кэш Telegram WebApp
+// ===============================
+// Добавляем случайный параметр к URL, чтобы Telegram всегда грузил свежую версию
+(function() {
+  if (tg) {
+    const url = new
