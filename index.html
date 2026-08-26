@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Опросник v12</title>
+<title>Опросник v13</title>
 
 <style>
   body {
@@ -73,9 +73,6 @@
 </div>
 
 <script>
-// ===============================
-// 1) Защита от отсутствия Telegram API
-// ===============================
 let tg = null;
 
 try {
@@ -84,57 +81,27 @@ try {
   tg = null;
 }
 
-// ===============================
-// 2) Анти-кэш Telegram WebApp
-// ===============================
-// Добавляем случайный параметр к URL, чтобы Telegram всегда грузил свежую версию
 (function() {
   if (tg) {
     const url = new URL(window.location.href);
-    url.searchParams.set("v", Date.now()); // уникальная версия
-    if (!window.location.search.includes("v=")) {
+    if (!url.searchParams.get("v")) {
+      url.searchParams.set("v", Date.now());
       window.location.replace(url.toString());
     }
   }
 })();
 
-// ===============================
-// 3) Конфиг формы
-// ===============================
 const config = {
   title: "Опросник по луку",
   version: "2026-08-27",
   fields: [
-    {
-      id: "quality",
-      label: "Как вам лук?",
-      type: "select",
-      options: ["Отличный", "Хороший", "Средний", "Плохой"]
-    },
-    {
-      id: "gift",
-      label: "Понравился подарок?",
-      type: "select",
-      options: ["Да", "Нет"]
-    },
-    {
-      id: "package",
-      label: "Как вам упаковка?",
-      type: "select",
-      options: ["Отличная", "Хорошая", "Средняя", "Плохая"]
-    },
-    {
-      id: "delivery",
-      label: "Как прошла доставка?",
-      type: "select",
-      options: ["Быстро", "Нормально", "Долго", "Очень долго"]
-    }
+    { id: "quality", label: "Как вам лук?", options: ["Отличный", "Хороший", "Средний", "Плохой"] },
+    { id: "gift", label: "Понравился подарок?", options: ["Да", "Нет"] },
+    { id: "package", label: "Как вам упаковка?", options: ["Отличная", "Хорошая", "Средняя", "Плохая"] },
+    { id: "delivery", label: "Как прошла доставка?", options: ["Быстро", "Нормально", "Долго", "Очень долго"] }
   ]
 };
 
-// ===============================
-// 4) Генерация формы
-// ===============================
 function loadForm() {
   document.getElementById("title").textContent = config.title;
 
@@ -164,9 +131,6 @@ function loadForm() {
 
 loadForm();
 
-// ===============================
-// 5) Отправка
-// ===============================
 function send() {
   const data = {};
   config.fields.forEach(f => {
@@ -175,22 +139,15 @@ function send() {
 
   const payload = {
     version: config.version,
-    answers: data,
-    initData: tg ? tg.initData : "local-test"
+    answers: data
   };
 
-  fetch("https://77.239.106.188/api/feedback", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  })
-  .then(r => r.json())
-  .then(res => {
-    console.log("Saved:", res);
-    if (tg) tg.close();
-    else alert("Локальный режим — данные отправлены");
-  })
-  .catch(err => console.error(err));
+  if (tg) {
+    tg.sendData(JSON.stringify(payload));
+  } else {
+    alert("Локальный режим — данные не отправлены в Telegram");
+    console.log("Payload:", payload);
+  }
 }
 </script>
 
