@@ -1,12 +1,168 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Опросник</title>
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: var(--tg-theme-bg-color, #f5f5f5);
+    color: var(--tg-theme-text-color, #222);
+    margin: 0;
+    padding: 20px;
+  }
+
+  h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: var(--tg-theme-text-color, #222);
+  }
+
+  .field {
+    margin-bottom: 20px;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  select, input, textarea {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid var(--tg-theme-hint-color, #ccc);
+    background: var(--tg-theme-bg-color, #fff);
+    color: var(--tg-theme-text-color, #222);
+    font-size: 16px;
+  }
+
+  button {
+    width: 100%;
+    padding: 14px;
+    font-size: 18px;
+    font-weight: bold;
+    border: none;
+    border-radius: 12px;
+    background: var(--tg-theme-button-color, #4a90e2);
+    color: var(--tg-theme-button-text-color, #fff);
+    cursor: pointer;
+    margin-top: 20px;
+  }
+
+  button:hover {
+    opacity: 0.9;
+  }
+
+  .container {
+    max-width: 480px;
+    margin: auto;
+  }
+</style>
+</head>
+
 <body>
+<div class="container">
   <h2 id="title">Опросник</h2>
-
   <div id="form"></div>
-
   <button onclick="send()">Отправить</button>
+</div>
 
-  <script src="app.js"></script>
+<script>
+const tg = window.Telegram.WebApp;
+
+// Конфиг прямо внутри файла — без questions.json
+const config = {
+  title: "Опросник по луку",
+  version: "2026-08-27",
+  fields: [
+    {
+      id: "quality",
+      label: "Как вам лук?",
+      type: "select",
+      options: ["Отличный", "Хороший", "Средний", "Плохой"]
+    },
+    {
+      id: "gift",
+      label: "Понравился подарок?",
+      type: "select",
+      options: ["Да", "Нет"]
+    },
+    {
+      id: "package",
+      label: "Как вам упаковка?",
+      type: "select",
+      options: ["Отличная", "Хорошая", "Средняя", "Плохая"]
+    },
+    {
+      id: "delivery",
+      label: "Как прошла доставка?",
+      type: "select",
+      options: ["Быстро", "Нормально", "Долго", "Очень долго"]
+    }
+  ]
+};
+
+// Генерация формы
+function loadForm() {
+  document.getElementById("title").textContent = config.title;
+
+  const form = document.getElementById("form");
+
+  config.fields.forEach(f => {
+    const wrapper = document.createElement("div");
+    wrapper.className = "field";
+
+    const label = document.createElement("label");
+    label.textContent = f.label;
+    wrapper.appendChild(label);
+
+    const select = document.createElement("select");
+    select.id = f.id;
+
+    f.options.forEach(opt => {
+      const o = document.createElement("option");
+      o.textContent = opt;
+      select.appendChild(o);
+    });
+
+    wrapper.appendChild(select);
+    form.appendChild(wrapper);
+  });
+}
+
+loadForm();
+
+// Отправка
+function send() {
+  const data = {};
+  config.fields.forEach(f => {
+    data[f.id] = document.getElementById(f.id).value;
+  });
+
+  const payload = {
+    version: config.version,
+    answers: data,
+    initData: tg.initData
+  };
+
+  fetch("https://77.239.106.188/api/feedback", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  })
+  .then(r => r.json())
+  .then(res => {
+    console.log("Saved:", res);
+    tg.close();
+  })
+  .catch(err => console.error(err));
+}
+</script>
+
 </body>
 </html>
