@@ -22,12 +22,26 @@
     const tg = window.Telegram.WebApp;
 
     function send() {
-      const data = {
-        quality: document.getElementById('quality').value,
-        gift: document.getElementById('gift').value
-      };
-      tg.sendData(JSON.stringify(data));
-    }
+  const data = {
+    quality: document.getElementById('quality').value,
+    gift: document.getElementById('gift').value
+  };
+
+  fetch("https://1198482.vds.as210546.net/api/feedback", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(data)
+  })
+  .then(r => r.json())
+  .then(res => {
+    console.log("Saved:", res);
+    tg.close(); // закрыть WebApp
+  })
+  .catch(err => console.error(err));
+}
+
   </script>
 </body>
 </html>
